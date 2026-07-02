@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { apiFetch } from '../../lib/api';
+import { apiFetch, ensureAuthenticatedSession } from '../../lib/api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 
@@ -22,21 +22,22 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
+      const normalizedEmail = email.trim();
       const data = await apiFetch('/api/v1/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
       if (data.requiresMfa) {
         setMfaToken(data.mfaToken);
         return;
       }
-      // Hard navigation, not router.push+refresh: app/page.jsx is a Server
-      // Component that reads the session cookie at request time — the
-      // client-side Router Cache can otherwise serve the stale signed-out
-      // (marketing) view for '/' right after login, making a successful
-      // login look like it silently failed and bounced back to the public
-      // page. A full navigation always re-evaluates the cookie server-side.
-      window.location.href = '/';
+      setEmail(normalizedEmail);
+      // Wait until the cookie-backed session and the first dashboard payload
+      // are both readable before leaving the auth page; otherwise a fast
+      // redirect can briefly land on the signed-out shell and look like the
+      // login bounced back to the public flow.
+      await ensureAuthenticatedSession();
+      window.location.replace('/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -55,13 +56,8 @@ export default function LoginPage() {
           useBackupCode ? { mfaToken, backupCode: mfaCode } : { mfaToken, code: mfaCode }
         ),
       });
-      // Hard navigation, not router.push+refresh: app/page.jsx is a Server
-      // Component that reads the session cookie at request time — the
-      // client-side Router Cache can otherwise serve the stale signed-out
-      // (marketing) view for '/' right after login, making a successful
-      // login look like it silently failed and bounced back to the public
-      // page. A full navigation always re-evaluates the cookie server-side.
-      window.location.href = '/';
+      await ensureAuthenticatedSession();
+      window.location.replace('/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -122,8 +118,27 @@ export default function LoginPage() {
         <h2>Sign in to your workspace</h2>
         <p className="login-sub">One secure login for every module, from CRM to billing and beyond.</p>
         <form onSubmit={handleSubmit}>
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
-          <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+          />
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           <div className="login-links-row">
             <Link href="/forgot-password" className="link-btn">Forgot password?</Link>
           </div>

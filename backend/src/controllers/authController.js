@@ -45,9 +45,12 @@ async function createSession(res, userId, req) {
 
 async function login(req, res) {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: 'Email and password are required.' });
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  if (!normalizedEmail || !password) {
+    return res.status(400).json({ error: 'Email and password are required.' });
+  }
 
-  const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
+  const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [normalizedEmail]);
   const user = rows[0];
 
   if (!user || !(await verifyPassword(password, user.password_hash))) {
