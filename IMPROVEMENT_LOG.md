@@ -83,6 +83,44 @@ remain genuinely open.
 
 ---
 
+## Pass 8 — 2026-07-02
+
+### Templates — other modules
+- Applied the same **"Start from scratch" / "Choose a template"** creation
+  pattern to the other blank-state content modules that were still missing it:
+  **Lead Generation**, **Email Marketing**, **Invoices**, **Quotations**,
+  **Forms & Surveys**, and **Custom Reports**. In each case the main header
+  action and the zero-state now offer both paths instead of forcing users down
+  a single blank-form flow.
+- Added a shared frontend gallery component,
+  `frontend/components/ui/StarterTemplateModal.jsx`, so these modules all use
+  one consistent template-picker pattern (search, category filter, highlight
+  bullets, apply action) instead of six copy-pasted modal implementations.
+- Added `frontend/lib/starterTemplates.js` as the central starter-library
+  source for the newly-covered modules:
+  - **Invoices**: 4 starters — monthly retainer, project milestone, product
+    delivery, deposit request.
+  - **Quotations / proposals**: 4 starters — website redesign, monthly
+    marketing retainer, event coverage, team workshop.
+  - **Lead Generation**: 4 starters — general contact, quote request, demo
+    request, event inquiry.
+  - **Forms & Surveys**: 4 starters — customer feedback, event registration,
+    consultation intake, program application.
+  - **Custom Reports**: 7 starters — revenue pulse, expense watch, lead
+    funnel, customer growth, inventory value, support workload, task balance.
+- **Email Marketing** already had the stronger seeded campaign-template
+  library from Pass 2, so this pass reused that existing template source and
+  aligned the entry UX with the newer "start blank vs choose template" split
+  instead of creating a second overlapping email-template system. Also wired
+  that seed into the standard `npm run seed` flow so fresh environments no
+  longer come up with an empty email-template chooser.
+- While wiring survey templates into the form builder, fixed a real data-shape
+  sharp edge in conditional logic: field IDs and `showIf.fieldId` values now
+  stay comparable as strings inside the builder, which keeps template-seeded
+  conditional fields stable instead of depending on number coercion.
+
+---
+
 ## Pass 7 — 2026-07-01
 
 ### User-reported bug: real accounts couldn't sign back in (fixed, root-caused, verified)
