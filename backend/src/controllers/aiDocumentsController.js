@@ -1,6 +1,16 @@
 const db = require('../db');
 const { fetchWithTimeout, logAiCall } = require('../utils/aiReliability');
 
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+const SYSTEM_PROMPTS = {
+  writer: 'You are a professional content writer. Write clear, engaging, well-structured content based on the prompt.',
+  email: 'You are an expert email copywriter. Write professional, conversion-focused emails based on the prompt.',
+  proposal: 'You are a business proposal expert. Write compelling, structured business proposals based on the prompt.',
+  blog: 'You are a professional blogger and SEO content writer. Write engaging blog posts with proper headings and structure.',
+};
+
 async function getStats(req, res) {
   const { rows } = await db.query(
     `SELECT doc_type, COUNT(*) AS count FROM ai_documents WHERE org_id=$1 GROUP BY doc_type`,
@@ -60,40 +70,54 @@ async function deleteDocument(req, res) {
 async function generateContent(req, res) {
   const { type, prompt, context } = req.body || {};
   if (!type || !prompt) return res.status(400).json({ error: 'type and prompt required.' });
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'anthropic', success: true, usedFallback: true, errorMessage: 'No ANTHROPIC_API_KEY configured' });
+    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'gemini', success: true, usedFallback: true, errorMessage: 'No GEMINI_API_KEY configured' });
     return res.json({ generated: buildTemplate(type, prompt, context), usedAI: false });
   }
   const startedAt = Date.now();
   try {
-    const systemPrompts = {
-      writer: 'You are a professional content writer. Write clear, engaging, well-structured content based on the prompt.',
-      email: 'You are an expert email copywriter. Write professional, conversion-focused emails based on the prompt.',
-      proposal: 'You are a business proposal expert. Write compelling, structured business proposals based on the prompt.',
-      blog: 'You are a professional blogger and SEO content writer. Write engaging blog posts with proper headings and structure.',
-    };
-    const response = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+    const response = await fetchWithTimeout(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      headers: { 'x-goog-api-key': apiKey, 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        system: systemPrompts[type] || systemPrompts.writer,
-        messages: [{ role: 'user', content: `${prompt}${context ? `\n\nContext: ${context}` : ''}` }]
+        systemInstruction: {
+          parts: [{ text: SYSTEM_PROMPTS[type] || SYSTEM_PROMPTS.writer }],
+        },
+        contents: [{
+          role: 'user',
+          parts: [{ text: `${prompt}${context ? `\n\nContext: ${context}` : ''}` }],
+        }],
+        generationConfig: {
+          maxOutputTokens: 1500,
+          temperature: 0.7,
+        },
       })
     });
-    if (!response.ok) throw new Error(`AI API error: ${response.status}`);
+    if (!response.ok) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`Gemini API error: ${response.status}${body ? ` ${body.slice(0, 200)}` : ''}`);
+    }
     const data = await response.json();
-    const generated = data.content?.[0]?.text || '';
-    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'anthropic', success: true, durationMs: Date.now() - startedAt });
+    const generated = extractGeminiText(data);
+    if (!generated) throw new Error('Gemini response contained no text.');
+    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'gemini', success: true, durationMs: Date.now() - startedAt });
     res.json({ generated, usedAI: true });
   } catch (err) {
     const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError';
     console.error('AI generate error:', err.message);
-    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'anthropic', success: false, usedFallback: true, errorMessage: isTimeout ? 'Timed out after 15s' : err.message, durationMs: Date.now() - startedAt });
+    logAiCall({ orgId: req.user.orgId, feature: `ai-documents:${type}`, provider: 'gemini', success: false, usedFallback: true, errorMessage: isTimeout ? 'Timed out after 15s' : err.message, durationMs: Date.now() - startedAt });
     res.json({ generated: buildTemplate(type, prompt, context), usedAI: false, warning: isTimeout ? 'AI request timed out, used template instead.' : 'AI unavailable, used template.' });
   }
+}
+
+function extractGeminiText(data) {
+  return (data.candidates || [])
+    .flatMap((candidate) => candidate?.content?.parts || [])
+    .map((part) => part?.text || '')
+    .filter(Boolean)
+    .join('\n\n')
+    .trim();
 }
 
 function buildTemplate(type, prompt, context) {

@@ -4106,7 +4106,7 @@ export default function AppShell() {
     try {
       const data = await apiFetch('/api/v1/ai-documents/generate', { method:'POST', body: JSON.stringify({ type, prompt }) });
       setAiDocDraft((d) => ({ ...d, content: data.generated, promptUsed: prompt }));
-      if (!data.usedAI) showToast('Template used — add ANTHROPIC_API_KEY to backend .env for real AI generation.', 'warning');
+      if (!data.usedAI) showToast('Template used — add GEMINI_API_KEY to the backend environment for real AI generation.', 'warning');
     } catch { showToast('Generation failed.'); }
     setAiDocGenerating(false);
   }
@@ -15865,7 +15865,7 @@ export default function AppShell() {
                   <input className="form-input" style={{ flex:1 }} placeholder={promptMap[docType]} value={aiDocPrompt} onChange={(e) => setAiDocPrompt(e.target.value)} onKeyDown={(e) => e.key==='Enter' && handleAiGenerate(docType, aiDocPrompt)} />
                   <button className="btn-primary" onClick={() => handleAiGenerate(docType, aiDocPrompt)} disabled={aiDocGenerating} style={{ minWidth:90 }}>{aiDocGenerating ? 'Generating…' : '✨ Generate'}</button>
                 </div>
-                <div style={{ fontSize:'0.7rem', color:'var(--muted)', marginTop:'0.3rem' }}>Powered by Claude AI — add ANTHROPIC_API_KEY to .env to enable</div>
+                <div style={{ fontSize:'0.7rem', color:'var(--muted)', marginTop:'0.3rem' }}>Powered by Gemini — add GEMINI_API_KEY to the backend environment to enable</div>
               </div>
               <textarea className="form-input" style={{ width:'100%', minHeight:350, fontFamily:'monospace', fontSize:'0.85rem', resize:'vertical' }} placeholder="Write or generate your content here…" value={aiDocDraft.content} onChange={(e) => setAiDocDraft((d)=>({...d,content:e.target.value}))} />
               <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.75rem' }}>
