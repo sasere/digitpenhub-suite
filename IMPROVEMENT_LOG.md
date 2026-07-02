@@ -83,6 +83,49 @@ remain genuinely open.
 
 ---
 
+## Pass 9 — 2026-07-02
+
+### Visual/UX inconsistencies sweep
+- This pass explicitly picked up the earlier **full surface sweep** that had
+  been deferred several times in the audit trail: visual consistency,
+  navigation clarity, loading/error states, and responsive polish across the
+  app shell instead of another module-specific feature bolt-on.
+- Tightened the shared design language in `frontend/app/globals.css`:
+  buttons now use a more restrained premium treatment (less gradient-heavy,
+  less pill-shaped, better loading affordance), cards and shells were reduced
+  to a cleaner radius/shadow profile, topbar/sidebar spacing was normalized,
+  and mobile breakpoints now compress the shell more deliberately instead of
+  just "shrinking until it fits."
+- Fixed a broad UX inconsistency in `frontend/components/ui/Button.jsx`:
+  the shared `loading` prop had been replacing every custom button label with
+  a generic `"Loading..."`, so different flows looked unfinished and lost
+  context (`Signing in`, `Creating account`, `Updating password`, etc.). The
+  shared button now keeps the caller's real label and adds a spinner instead.
+- Added two reusable shared surfaces for state consistency:
+  `frontend/components/ui/AuthShell.jsx` for login-like entry flows, and
+  `frontend/components/ui/PageState.jsx` for centered loading/error/success
+  panels. These are now used by the main auth routes and selected shell/admin
+  states instead of plain centered text or one-off inline styling.
+- Migrated **Login**, **Signup**, **Forgot Password**, **Reset Password**, and
+  **Accept Invite** onto the same auth layout. Before this pass, Invite was
+  still a one-off page with its own inline styles, different spacing, and
+  weaker error/success handling than the rest of the auth surface.
+- Improved app-shell navigation clarity in `Sidebar.jsx` / `Topbar.jsx`:
+  search results and pinned items now show clearer labels, locked modules use
+  a proper badge instead of inline emoji noise, account/billing/white-label
+  actions are grouped into a dedicated footer section, the mobile drawer uses
+  a better width/backdrop treatment, and the topbar now holds together more
+  cleanly on smaller screens.
+- Replaced the workspace shell's raw center-screen loading/error text in
+  `AppShell.jsx` with retryable premium state panels. Also split initial auth
+  loading from module loading so a failed `/api/v1/modules` request no longer
+  has to look like a session-expiry redirect.
+- Gave the admin route a matching access/loading state via the same shared
+  `PageState` component, so admin no longer flashes a plain gray "Checking
+  access..." page while the rest of the app has richer state handling.
+- Validation: `cd frontend && npm run build` passed; `cd backend && node --test`
+  passed.
+
 ## Pass 8 — 2026-07-02
 
 ### Templates — other modules

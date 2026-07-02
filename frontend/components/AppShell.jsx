@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, setUpgradeHandler } from '../lib/api';
 import Sidebar from './ui/Sidebar';
@@ -25,6 +25,7 @@ import BulkActionBar from './ui/BulkActionBar';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
 import ModulePage from './ui/ModulePage';
+import PageState from './ui/PageState';
 import StarterTemplateModal from './ui/StarterTemplateModal';
 import {
   getInvoiceStarterTemplates,
@@ -1445,27 +1446,35 @@ export default function AppShell() {
     window.localStorage.setItem('dph-theme', theme);
   }, [theme]);
 
+  const loadWorkspace = useCallback(async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const meRes = await apiFetch('/api/v1/auth/me');
+      setUser(meRes.user);
+    } catch (err) {
+      // Session likely expired/revoked between the middleware check and this
+      // render. Hard navigation (not router.push) so the stale session
+      // cookie is guaranteed to be re-evaluated fresh rather than bouncing
+      // right back here via a cached client-side render.
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const modulesRes = await apiFetch('/api/v1/modules');
+      setCategories(modulesRes.categories || []);
+      setOrgPlan(modulesRes.plan || null);
+    } catch (err) {
+      setLoadError(err.message || 'Could not load the workspace.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    (async () => {
-      try {
-        const [meRes, modulesRes] = await Promise.all([
-          apiFetch('/api/v1/auth/me'),
-          apiFetch('/api/v1/modules'),
-        ]);
-        setUser(meRes.user);
-        setCategories(modulesRes.categories);
-        setOrgPlan(modulesRes.plan || null);
-      } catch (err) {
-        // Session likely expired/revoked between the middleware check and this
-        // render. Hard navigation (not router.push) so the stale session
-        // cookie is guaranteed to be re-evaluated fresh rather than bouncing
-        // right back here via a cached client-side render.
-        window.location.href = '/login';
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [router]);
+    loadWorkspace();
+  }, [loadWorkspace]);
 
   useEffect(() => {
     if (user?.fullName != null) setAcctNameDraft(user.fullName);
@@ -6587,17 +6596,25 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-        Loading workspace…
-      </div>
+      <PageState
+        fullscreen
+        loading
+        title="Loading workspace"
+        description="Pulling your modules, navigation, and current workspace settings."
+      />
     );
   }
 
   if (loadError) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--danger)', fontSize: '0.9rem', fontWeight: 600 }}>
-        {loadError}
-      </div>
+      <PageState
+        fullscreen
+        tone="danger"
+        icon="!"
+        title="Couldn't load the workspace"
+        description={loadError}
+        action={<Button onClick={loadWorkspace}>Try again</Button>}
+      />
     );
   }
 
@@ -6617,9 +6634,16 @@ export default function AppShell() {
         onMarkAllRead={handleMarkAllRead}
         onToggleSidebar={() => setNavOpen((v) => !v)}
       >
-        <button className="ghost-btn" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-        </button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="theme-toggle-btn"
+          type="button"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        >
+          <span className="theme-toggle-icon" aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+          <span className="theme-toggle-label">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+        </Button>
       </Topbar>
 
       <div className={["app-shell", navOpen ? 'nav-open' : ''].filter(Boolean).join(' ')}>
