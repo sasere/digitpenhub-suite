@@ -49,6 +49,8 @@ const assetsRoutes       = require('./routes/assets');
 const imagesRoutes       = require('./routes/images');
 const templatesRoutes    = require('./routes/templates');
 const siteTemplatesRoutes = require('./routes/siteTemplates');
+const funnelTemplatesRoutes = require('./routes/funnelTemplates');
+const formTemplatesRoutes = require('./routes/formTemplates');
 const emailTemplatesRoutes = require('./routes/emailTemplates');
 const ordersRoutes       = require('./routes/orders');
 const documentsRoutes    = require('./routes/documents');
@@ -146,6 +148,8 @@ app.use('/api/v1/assets',        requireAuth, requireModuleAccess('asset-managem
 app.use('/api/v1/images',        imagesRoutes);
 app.use('/api/v1/page-templates', requireAuth, requireModuleAccess('website-builder'), templatesRoutes);
 app.use('/api/v1/site-templates', requireAuth, requireModuleAccess('website-builder'), siteTemplatesRoutes);
+app.use('/api/v1/funnel-templates', requireAuth, requireModuleAccess('funnel-builder'), funnelTemplatesRoutes);
+app.use('/api/v1/form-templates', requireAuth, requireModuleAccess('forms'), formTemplatesRoutes);
 app.use('/api/v1/email-templates', requireAuth, requireModuleAccess('email-marketing'), emailTemplatesRoutes);
 app.use('/api/v1/orders',        requireAuth, requireModuleAccess('order-management'), ordersRoutes);
 app.use('/api/v1/documents',       requireAuth, requireModuleAccess('document-management'), documentsRoutes);

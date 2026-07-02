@@ -5,16 +5,31 @@ function slugify(str) {
 }
 
 async function listSiteTemplates(req, res) {
-  const { category } = req.query;
+  const { category, q } = req.query;
+  const conditions = [];
+  const values = [];
+  let idx = 1;
+
+  if (category) {
+    conditions.push(`st.category = $${idx++}`);
+    values.push(category);
+  }
+  if (q && q.trim()) {
+    conditions.push(`(st.name ILIKE $${idx} OR st.description ILIKE $${idx})`);
+    values.push(`%${q.trim()}%`);
+    idx += 1;
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const { rows } = await db.query(
     `SELECT st.id, st.category, st.name, st.description, st.thumbnail_url, st.sort_order,
             COUNT(stp.id) AS page_count
      FROM site_templates st
      LEFT JOIN site_template_pages stp ON stp.site_template_id = st.id
-     ${category ? 'WHERE st.category = $1' : ''}
+     ${where}
      GROUP BY st.id
      ORDER BY st.category, st.sort_order, st.name`,
-    category ? [category] : []
+    values
   );
   res.json({ templates: rows });
 }

@@ -2059,3 +2059,109 @@ real sending; continue the `ModulePage` retrofit batch (recruitment,
 asset-management, knowledge-base, per Pass 12's suggestion, still not
 done). Also: **before any live-browser verification step in any future
 pass, restart PM2 first** — this has now cost real time three passes running.
+
+---
+
+### Pass 14 — Builder template libraries and two-path starts
+
+This pass stayed tightly on the builder brief instead of re-auditing the
+whole product again: make Website Builder, Funnel Builder, Landing Page
+Builder, and Forms/Survey Builder each present two explicit starting paths
+("Start from scratch" and "Start from a template"), expand the template
+coverage across the requested categories, and make the template data part of
+the real seed path instead of something that only exists if a prior pass ran
+manual scripts in the right order.
+
+### Template Library
+
+- **Seed path fixed**: `backend/package.json`'s `npm run seed` now runs the
+  page-template, site-template, email-template, funnel-template, and
+  form-template seed scripts after the base org/module seed. Fresh setups now
+  rebuild the shared template libraries automatically instead of depending on
+  one-off manual seeding from an earlier session.
+- **Website Builder / site templates**:
+  expanded the multi-page site library from 3 categories to all 7 requested
+  verticals by adding:
+  - `North & Bloom — Full Retail Site`
+  - `Summit Method — Full Fitness Site`
+  - `Northline Advisory — Full Consulting Site`
+  - `Signal House — Full Creative Site`
+  The 3 existing multi-page sites (Real Estate, SaaS, Restaurants) were kept,
+  and the seeder now also back-fills missing `thumbnail_url` values on already-
+  seeded site templates so the gallery can show real preview images instead of
+  blank cards on older databases.
+- **Funnel Builder**:
+  added a real shared `funnel_templates` library (migration
+  `070_builder_template_libraries.sql`, new `/api/v1/funnel-templates`
+  endpoints, new `seedFunnelTemplates.js`) with 7 category-structured funnels:
+  Seller Lead Funnel, Product Launch Funnel, Free Trial Funnel, Fitness
+  Consultation Funnel, Catering Inquiry Funnel, Discovery Call Funnel, and
+  Project Inquiry Funnel. Each template creates a real funnel plus real draft
+  landing pages wired together with working next-step CTAs, not a fake preview.
+- **Forms / Survey Builder**:
+  added a shared `form_templates` library (same migration, new
+  `/api/v1/form-templates`, new `seedFormTemplates.js`) with 7 real starter
+  forms: Buyer Inquiry, VIP Product Waitlist, Demo Request, Consultation
+  Intake, Catering Inquiry, Discovery Call Application, and Creative Project
+  Brief. These load into the existing form editor before save, so the same
+  field/conditional-logic builder used for scratch forms remains the only edit
+  path.
+- **Frontend start-path UX** (`frontend/components/AppShell.jsx`):
+  each builder now makes the two paths explicit in its empty state and top
+  actions:
+  - Website Builder: scratch vs template, with template branching into
+    single-page templates or multi-page site templates.
+  - Funnel Builder: scratch vs funnel template gallery.
+  - Landing Page Builder: scratch vs landing template gallery.
+  - Forms & Surveys: scratch vs form template gallery.
+- **Workspace entry path fixed**:
+  after proof verification exposed that the shared module catalog still marked
+  these builders as `coming_soon`, `backend/db/categories.data.js` was updated
+  so Landing Page Builder, Website Builder, Funnel Builder, Forms, and Survey
+  Builder seed as live modules with real routes. Rerunning `npm run seed` then
+  made the workspace tiles open the shipped builder surfaces instead of showing
+  the generic "being built" toast.
+- **Gallery quality upgrades**:
+  the site-template gallery now has the same baseline features the page
+  template gallery already had — search, category filtering, and preview
+  thumbnails — rather than category-only text cards. The new funnel and form
+  galleries ship with the same pattern from day one (search + category filter +
+  preview thumbnail + "use template" action).
+- **Editability follow-through**:
+  Funnel Builder step rows now include an "Edit page" action that jumps the
+  user directly into the underlying Website Builder / Landing Page Builder page
+  editor for that step. That closes the biggest practical gap in "template is
+  editable via the same builder" for funnel-generated pages.
+
+### Requested category coverage — current counts
+
+These counts are from the real database immediately after `npm run migrate`
+and `npm run seed`, not estimated from code:
+
+- **Real Estate** — page/landing templates: 2, multi-page site templates: 1,
+  funnel templates: 1, form templates: 1
+- **E-commerce & Retail** — page/landing templates: 2, multi-page site
+  templates: 1, funnel templates: 1, form templates: 1
+- **SaaS & Tech Startups** — page/landing templates: 2, multi-page site
+  templates: 1, funnel templates: 1, form templates: 1
+- **Health & Fitness** (stored as `Health, Fitness & Wellness`) — page/landing
+  templates: 2, multi-page site templates: 1, funnel templates: 1, form
+  templates: 1
+- **Restaurants & Food Delivery** — page/landing templates: 2, multi-page
+  site templates: 1, funnel templates: 1, form templates: 1
+- **Coaching & Consulting** — page/landing templates: 2, multi-page site
+  templates: 1, funnel templates: 1, form templates: 1
+- **Creative Portfolio** (stored as `Creative Portfolio & Agency`) —
+  page/landing templates: 2, multi-page site templates: 1, funnel templates:
+  1, form templates: 1
+
+### Verification notes
+
+- `backend/node --test` passes with 2 new focused tests covering the new
+  template controllers.
+- `frontend/npm run build` passes after the AppShell changes.
+- `npm run migrate` applied `070_builder_template_libraries.sql`.
+- `npm run seed` populated the new funnel/form/site template rows successfully,
+  proving the template-library work is now reproducible from the normal setup
+  path rather than living only in one warmed database, and also flipped the
+  builder module tiles from `coming_soon` to live in the shared catalog.

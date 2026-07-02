@@ -1,8 +1,26 @@
 // Single source of truth for the module catalog. Mirrors the master prompt's
 // PRODUCT CATEGORIES section exactly. Edit here, then re-run `npm run seed`.
-// `status` for everything defaults to coming_soon except the two below.
-const ACTIVE = new Set(['CRM', 'Project Management', 'Invoices']);
-const ROUTES = { CRM: '/modules/crm', 'Project Management': '/modules/pm', Invoices: '/modules/invoices' };
+// `status` for everything defaults to coming_soon except the live modules below.
+const ACTIVE = new Set([
+  'CRM',
+  'Invoices',
+  'Project Management',
+  'Landing Page Builder',
+  'Website Builder',
+  'Funnel Builder',
+  'Forms',
+  'Survey Builder',
+]);
+const ROUTES = {
+  CRM: '/modules/crm',
+  Invoices: '/modules/invoices',
+  'Project Management': '/modules/pm',
+  'Landing Page Builder': '/modules/landing-page-builder',
+  'Website Builder': '/modules/website-builder',
+  'Funnel Builder': '/modules/funnel-builder',
+  Forms: '/modules/forms',
+  'Survey Builder': '/modules/survey-builder',
+};
 
 const CATEGORIES = [
   { key: 'marketing', name: 'Marketing', badge: 'MK', modules: ['CRM','Lead Generation','Landing Page Builder','Website Builder','Funnel Builder','Email Marketing','SMS Marketing','WhatsApp Marketing','Marketing Automation','Affiliate System','Referral Program','Appointment Booking','Forms','Popup Builder','Survey Builder','Quiz Builder','URL Shortener','QR Code Generator','Link-in-Bio','Digital Business Cards'] },
