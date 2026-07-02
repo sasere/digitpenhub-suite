@@ -290,6 +290,263 @@ const SITES = [
       },
     ],
   },
+  {
+    category: 'E-commerce & Retail',
+    name: 'North & Bloom — Full Retail Site',
+    description: 'A 5-page retail site: home, story, collection highlights, reviews, and contact.',
+    pages: [
+      {
+        role: 'home', slugSuffix: '', title: 'North & Bloom', navLabel: 'Home',
+        metaDescription: 'North & Bloom — a modern retail brand for everyday essentials, gifting, and seasonal launches.',
+        imageQuery: 'retail store lifestyle products',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Everyday products, packaged like they belong in your life', subheading: 'North & Bloom curates practical essentials, thoughtful gifts, and seasonal collections that feel elevated without feeling precious.', ctaText: 'Shop the collection', ctaUrl: '__LINK:shop__', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('image', { url: heroImg, alt: 'Retail product display', caption: '' }),
+          blk('features', { heading: 'Why customers start here', items: [
+            { icon: '🛍️', title: 'Curated essentials', desc: 'Products chosen for repeated use, not one-time impulse buys.' },
+            { icon: '🎁', title: 'Gift-ready bundles', desc: 'Simple pairings and seasonal boxes that save shoppers time.' },
+            { icon: '🚚', title: 'Fast fulfillment', desc: 'Small-batch launches, packed quickly, with transparent delivery updates.' },
+          ] }),
+        ],
+      },
+      {
+        role: 'about', slugSuffix: 'story', title: 'Our Story', navLabel: 'Story',
+        metaDescription: 'How North & Bloom approaches product curation, launches, and customer experience.',
+        imageQuery: 'retail founder packing orders',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Built for people who want fewer, better things', subheading: 'Our story, our standards, and why we launch the way we do.', bgColor: '#7c2d12', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'How we started', body: 'North & Bloom started with a simple frustration: too many products were either disposable or over-designed. We wanted to build a store around everyday pieces that earn their place by being useful, durable, and easy to gift.' }),
+          blk('image', { url: heroImg, alt: 'Founder packing retail orders', caption: 'The small team behind our launch-week packing line.' }),
+          blk('text', { heading: 'What we look for', body: 'We test every product in normal use before it goes live. If something does not hold up, solve a real problem, or make daily life a little calmer, it does not stay in the collection.' }),
+        ],
+      },
+      {
+        role: 'shop', slugSuffix: 'shop', title: 'Collection Highlights', navLabel: 'Shop',
+        metaDescription: 'Featured products, launch bundles, and gifting favorites from North & Bloom.',
+        imageQuery: 'gift box retail ecommerce products',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Collection highlights', subheading: 'A sample of what customers reach for most often.', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('image', { url: heroImg, alt: 'Retail gift set', caption: '' }),
+          blk('text', { heading: 'Launch bundle — $84', body: 'A three-piece starter set built around the products customers use together most often, packed in a reusable gift box.' }),
+          blk('text', { heading: 'Desk reset kit — $38', body: 'Our most popular gift pick for founders, managers, and anyone rebuilding their weekday rhythm.' }),
+          blk('text', { heading: 'Seasonal edit — from $18', body: 'Small-batch additions built around one seasonal ritual at a time.' }),
+        ],
+      },
+      {
+        role: 'testimonials', slugSuffix: 'reviews', title: 'Reviews', navLabel: 'Reviews',
+        metaDescription: 'What shoppers say about ordering from North & Bloom.',
+        build: () => [
+          blk('hero', { heading: 'What customers say', subheading: '', bgColor: '#7c2d12', textColor: '#ffffff', align: 'center' }),
+          blk('testimonials', { heading: '', items: [
+            { quote: 'Every item felt like something I would actually use, not shelf filler. The bundle is genuinely thoughtful.', author: 'Priya N.', role: 'Launch customer' },
+            { quote: 'Fast shipping, clear updates, and the gift packaging looked premium without being over the top.', author: 'Derrick B.', role: 'Repeat buyer' },
+          ] }),
+        ],
+      },
+      {
+        role: 'contact', slugSuffix: 'contact', title: 'Contact', navLabel: 'Contact',
+        metaDescription: 'Contact North & Bloom about orders, gifting, or wholesale inquiries.',
+        build: () => [
+          blk('hero', { heading: 'Questions about an order, gift, or launch?', subheading: 'Reach out directly and a real team member will get back to you.', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Customer care', body: 'Email: hello@northandbloom.example\nHours: Mon–Fri, 9am–5pm' }),
+          blk('text', { heading: 'Wholesale & gifting', body: 'For larger gifting runs, launch collaborations, or wholesale inquiries, tell us the timeline and quantity you have in mind.' }),
+        ],
+      },
+    ],
+  },
+  {
+    category: 'Health, Fitness & Wellness',
+    name: 'Summit Method — Full Fitness Site',
+    description: 'A 5-page coaching site: home, story, programs, results, and contact.',
+    pages: [
+      {
+        role: 'home', slugSuffix: '', title: 'Summit Method', navLabel: 'Home',
+        metaDescription: 'Summit Method — strength, mobility, and habit coaching for busy professionals.',
+        imageQuery: 'fitness coaching gym workout',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Coaching that fits real schedules and still gets results', subheading: 'Summit Method combines training, recovery, and habit design for people who need a plan they can actually stick to.', ctaText: 'View programs', ctaUrl: '__LINK:services__', bgColor: '#14532d', textColor: '#ffffff', align: 'center' }),
+          blk('image', { url: heroImg, alt: 'Fitness coaching session', caption: '' }),
+          blk('features', { heading: 'What clients get', items: [
+            { icon: '🏋️', title: 'Personalized programming', desc: 'Training plans shaped around your goals, equipment, and weekly reality.' },
+            { icon: '🧠', title: 'Habit support', desc: 'Nutrition, sleep, and recovery guidance that supports the training plan.' },
+            { icon: '📈', title: 'Clear progress tracking', desc: 'Simple checkpoints so momentum is easy to see and maintain.' },
+          ] }),
+        ],
+      },
+      {
+        role: 'about', slugSuffix: 'about', title: 'Our Story', navLabel: 'Story',
+        metaDescription: 'Why Summit Method was built and how the coaching approach works.',
+        imageQuery: 'personal trainer coach gym',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Built for clients who need structure, not hype', subheading: 'Our story, our philosophy, and the coaching standard we hold ourselves to.', bgColor: '#166534', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Why we started', body: 'Summit Method started after too many clients came in frustrated by plans that assumed unlimited time, motivation, and recovery capacity. We built our coaching model around consistency instead: clear priorities, realistic pacing, and honest adjustments when life gets busy.' }),
+          blk('image', { url: heroImg, alt: 'Coach in a gym', caption: '' }),
+          blk('text', { heading: 'What we believe', body: 'You do not need a harder plan. You need a better one: one that supports your energy, respects your actual calendar, and still pushes forward.' }),
+        ],
+      },
+      {
+        role: 'services', slugSuffix: 'programs', title: 'Programs', navLabel: 'Programs',
+        metaDescription: 'Summit Method programs for 1:1 coaching, hybrid training, and group accountability.',
+        imageQuery: 'group fitness training session',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Programs built around how you like to train', subheading: '', bgColor: '#14532d', textColor: '#ffffff', align: 'center' }),
+          blk('features', { heading: 'Current offers', items: [
+            { icon: '👤', title: '1:1 coaching', desc: 'Private coaching for clients who want detailed oversight and accountability.' },
+            { icon: '💻', title: 'Hybrid coaching', desc: 'Train online with weekly check-ins, form reviews, and monthly strategy updates.' },
+            { icon: '👥', title: 'Small-group accountability', desc: 'Structured training with community support and coach-led checkpoints.' },
+          ] }),
+          blk('image', { url: heroImg, alt: 'Group training session', caption: '' }),
+        ],
+      },
+      {
+        role: 'testimonials', slugSuffix: 'results', title: 'Client Results', navLabel: 'Results',
+        metaDescription: 'Client stories and progress examples from Summit Method.',
+        build: () => [
+          blk('hero', { heading: 'What clients notice first', subheading: '', bgColor: '#166534', textColor: '#ffffff', align: 'center' }),
+          blk('testimonials', { heading: '', items: [
+            { quote: 'I finally stopped restarting every Monday. The plan fit my real week and that changed everything.', author: 'Melissa G.', role: 'Hybrid coaching client' },
+            { quote: 'Mobility work used to feel optional until my coach showed me how much it affected every session after.', author: 'David T.', role: '1:1 client' },
+          ] }),
+        ],
+      },
+      {
+        role: 'contact', slugSuffix: 'contact', title: 'Contact', navLabel: 'Contact',
+        metaDescription: 'Book an assessment or contact Summit Method for coaching questions.',
+        build: () => [
+          blk('hero', { heading: 'Ready to talk through your goals?', subheading: 'Reach out for an assessment, coaching question, or program recommendation.', bgColor: '#14532d', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'How to reach us', body: 'Email: hello@summitmethod.example\nHours: Mon–Sat, 7am–7pm' }),
+        ],
+      },
+    ],
+  },
+  {
+    category: 'Coaching & Consulting',
+    name: 'Northline Advisory — Full Consulting Site',
+    description: 'A 5-page consulting site: home, about, services, case studies, and contact.',
+    pages: [
+      {
+        role: 'home', slugSuffix: '', title: 'Northline Advisory', navLabel: 'Home',
+        metaDescription: 'Northline Advisory — strategic consulting for operators, founders, and growth-stage teams.',
+        imageQuery: 'business consulting strategy meeting',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Strategy for leaders who need traction, not theory', subheading: 'Northline Advisory helps teams diagnose bottlenecks, make sharper decisions, and execute with more discipline.', ctaText: 'Explore services', ctaUrl: '__LINK:services__', bgColor: '#1e293b', textColor: '#ffffff', align: 'center' }),
+          blk('image', { url: heroImg, alt: 'Consulting strategy meeting', caption: '' }),
+          blk('features', { heading: 'How clients use us', items: [
+            { icon: '📈', title: 'Growth strategy', desc: 'Clarify where growth is actually coming from and what is slowing it down.' },
+            { icon: '🛠️', title: 'Operating system cleanup', desc: 'Simplify decision-making, meetings, ownership, and reporting rhythms.' },
+            { icon: '🤝', title: 'Executive advisory', desc: 'A steady outside voice for high-stakes calls and team alignment.' },
+          ] }),
+        ],
+      },
+      {
+        role: 'about', slugSuffix: 'about', title: 'About', navLabel: 'About',
+        metaDescription: 'The origin story and philosophy behind Northline Advisory.',
+        imageQuery: 'executive consultant office',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Built by operators who care about follow-through', subheading: '', bgColor: '#334155', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Our story', body: 'Northline Advisory was built after years of watching leadership teams leave offsites with impressive slide decks and no real operating rhythm to support them. Our work starts where most strategy projects stop: with the practical systems and ownership needed to make the plan move.' }),
+          blk('image', { url: heroImg, alt: 'Executive consultant in office', caption: '' }),
+          blk('text', { heading: 'How we work', body: 'We keep the work small enough to be actionable and sharp enough to matter. That means fewer recommendations, tighter ownership, and clearer checkpoints.' }),
+        ],
+      },
+      {
+        role: 'services', slugSuffix: 'services', title: 'Services', navLabel: 'Services',
+        metaDescription: 'Northline Advisory services for strategy, executive support, and operating rhythm design.',
+        imageQuery: 'business workshop presentation team',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Three ways we usually engage', subheading: '', bgColor: '#1e293b', textColor: '#ffffff', align: 'center' }),
+          blk('features', { heading: 'Engagement options', items: [
+            { icon: '🧭', title: 'Strategy sprint', desc: 'A short, focused engagement to define priorities, risks, and the next 90 days.' },
+            { icon: '📅', title: 'Operating rhythm rebuild', desc: 'Meetings, dashboards, ownership, and cadence redesigned around execution.' },
+            { icon: '🎯', title: 'Advisory retainer', desc: 'Monthly decision support for leaders navigating growth, change, or uncertainty.' },
+          ] }),
+          blk('image', { url: heroImg, alt: 'Business workshop presentation', caption: '' }),
+        ],
+      },
+      {
+        role: 'portfolio', slugSuffix: 'case-studies', title: 'Case Studies', navLabel: 'Case Studies',
+        metaDescription: 'Selected client outcomes and project examples from Northline Advisory.',
+        build: () => [
+          blk('hero', { heading: 'A few of the problems we have helped untangle', subheading: '', bgColor: '#334155', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'B2B services team', body: 'Clarified ownership across sales and delivery, reducing handoff delays and improving forecast accuracy in six weeks.' }),
+          blk('text', { heading: 'Consumer startup', body: 'Reworked the founder reporting rhythm and leadership cadence so the team could prioritize fewer experiments more decisively.' }),
+          blk('text', { heading: 'Professional services firm', body: 'Redesigned operating reviews and client delivery checkpoints, leading to faster escalation and fewer last-minute fires.' }),
+        ],
+      },
+      {
+        role: 'contact', slugSuffix: 'contact', title: 'Contact', navLabel: 'Contact',
+        metaDescription: 'Contact Northline Advisory about a discovery call or consulting engagement.',
+        build: () => [
+          blk('hero', { heading: 'If the problem is clear, we can probably help', subheading: 'Tell us what is stuck, what is changing, or what decision the team keeps circling.', bgColor: '#1e293b', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Reach out', body: 'Email: hello@northlineadvisory.example\nDiscovery calls available Tue–Thu' }),
+        ],
+      },
+    ],
+  },
+  {
+    category: 'Creative Portfolio & Agency',
+    name: 'Signal House — Full Creative Site',
+    description: 'A 5-page agency site: home, studio story, services, selected work, and contact.',
+    pages: [
+      {
+        role: 'home', slugSuffix: '', title: 'Signal House', navLabel: 'Home',
+        metaDescription: 'Signal House — brand, web, and launch creative for modern teams.',
+        imageQuery: 'creative agency design studio team',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Creative work that ships with the launch, not after it', subheading: 'Signal House helps teams shape brands, websites, and campaigns with enough strategy behind the visuals to make them stick.', ctaText: 'See the work', ctaUrl: '__LINK:portfolio__', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('image', { url: heroImg, alt: 'Creative agency studio', caption: '' }),
+          blk('features', { heading: 'What we build', items: [
+            { icon: '🎨', title: 'Brand systems', desc: 'Identity, messaging, and rollout support for brands that need more than a logo.' },
+            { icon: '💻', title: 'Web launches', desc: 'Design and content systems that move from concept to live site cleanly.' },
+            { icon: '📸', title: 'Campaign assets', desc: 'Photography, motion, and launch collateral that match the strategy.' },
+          ] }),
+        ],
+      },
+      {
+        role: 'about', slugSuffix: 'studio', title: 'Studio Story', navLabel: 'Studio',
+        metaDescription: 'The studio philosophy and team behind Signal House.',
+        imageQuery: 'design team brainstorming studio',
+        build: (heroImg) => [
+          blk('hero', { heading: 'A small studio by design', subheading: '', bgColor: '#0f172a', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Why small matters', body: 'Signal House stays intentionally lean so strategy, design, and delivery stay close together. The same people shaping the brief are involved when the work ships, which keeps decisions tighter and launches calmer.' }),
+          blk('image', { url: heroImg, alt: 'Design team brainstorming', caption: '' }),
+          blk('text', { heading: 'What clients can expect', body: 'Clear recommendations, fewer rounds of drift, and a creative process that respects launch deadlines instead of ignoring them.' }),
+        ],
+      },
+      {
+        role: 'services', slugSuffix: 'services', title: 'Services', navLabel: 'Services',
+        metaDescription: 'Signal House services for brand design, websites, and launch campaigns.',
+        imageQuery: 'website design review presentation',
+        build: (heroImg) => [
+          blk('hero', { heading: 'Where we usually help most', subheading: '', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('features', { heading: 'Core services', items: [
+            { icon: '✍️', title: 'Brand refreshes', desc: 'Sharper positioning, updated visual systems, and launch support for the rollout.' },
+            { icon: '🖥️', title: 'Marketing sites', desc: 'Page systems that balance storytelling, proof, and conversion.' },
+            { icon: '🚀', title: 'Launch campaigns', desc: 'Creative direction plus the asset package to support the release.' },
+          ] }),
+          blk('image', { url: heroImg, alt: 'Website design review', caption: '' }),
+        ],
+      },
+      {
+        role: 'portfolio', slugSuffix: 'work', title: 'Selected Work', navLabel: 'Work',
+        metaDescription: 'Selected projects and outcomes from Signal House.',
+        build: () => [
+          blk('hero', { heading: 'Selected work', subheading: '', bgColor: '#0f172a', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'B2B SaaS relaunch', body: 'Reframed the homepage, updated the visual system, and launched a clearer proof narrative for sales conversations.' }),
+          blk('text', { heading: 'Retail seasonal launch', body: 'Built a light campaign system, product storytelling, and asset kit for a timed collection drop.' }),
+          blk('text', { heading: 'Founder-led advisory brand', body: 'Created the identity, site system, and launch kit for a new consulting offer.' }),
+        ],
+      },
+      {
+        role: 'contact', slugSuffix: 'contact', title: 'Contact', navLabel: 'Contact',
+        metaDescription: 'Contact Signal House about a creative project or launch.',
+        build: () => [
+          blk('hero', { heading: 'If you have the brief, we can shape the next step', subheading: 'Tell us what is launching, what is changing, or what the current brand is failing to communicate.', bgColor: '#111827', textColor: '#ffffff', align: 'center' }),
+          blk('text', { heading: 'Email the studio', body: 'hello@signalhouse.example\nReplies typically within one business day.' }),
+        ],
+      },
+    ],
+  },
 ];
 
 (async () => {
@@ -297,8 +554,24 @@ const SITES = [
   let sitesInserted = 0, sitesSkipped = 0, pagesInserted = 0;
 
   for (const [siteIdx, site] of SITES.entries()) {
-    const { rows: existing } = await pool.query(`SELECT id FROM site_templates WHERE name = $1`, [site.name]);
+    const { rows: existing } = await pool.query(`SELECT id, thumbnail_url FROM site_templates WHERE name = $1`, [site.name]);
+    const thumbnailQuery = site.pages.find((p) => p.imageQuery)?.imageQuery;
+    let thumbnailUrl = '';
+    if (thumbnailQuery) {
+      console.log(`Preparing thumbnail for "${site.name}" ("${thumbnailQuery}")...`);
+      thumbnailUrl = await img(thumbnailQuery);
+    }
     if (existing.length) {
+      await pool.query(
+        `UPDATE site_templates
+         SET category = $1,
+             description = $2,
+             thumbnail_url = COALESCE(NULLIF(thumbnail_url, ''), $3),
+             sort_order = $4,
+             updated_at = now()
+         WHERE id = $5`,
+        [site.category, site.description, thumbnailUrl || null, siteIdx, existing[0].id]
+      );
       console.log(`Skipping site "${site.name}" (already seeded)`);
       sitesSkipped += 1;
       continue;
@@ -311,8 +584,8 @@ const SITES = [
 
     console.log(`\nBuilding site "${site.name}" (${site.pages.length} pages)...`);
     const { rows: siteRows } = await pool.query(
-      `INSERT INTO site_templates (category, name, description, sort_order) VALUES ($1,$2,$3,$4) RETURNING id`,
-      [site.category, site.name, site.description, siteIdx]
+      `INSERT INTO site_templates (category, name, description, thumbnail_url, sort_order) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [site.category, site.name, site.description, thumbnailUrl || null, siteIdx]
     );
     const siteTemplateId = siteRows[0].id;
 

@@ -1347,9 +1347,26 @@ export default function AppShell() {
   const [siteTplList, setSiteTplList] = useState([]);
   const [siteTplCategories, setSiteTplCategories] = useState([]);
   const [siteTplCategoryFilter, setSiteTplCategoryFilter] = useState('');
+  const [siteTplSearch, setSiteTplSearch] = useState('');
   const [siteTplLoading, setSiteTplLoading] = useState(false);
   const [siteTplUsingId, setSiteTplUsingId] = useState(null);
   const [siteTplNameDraft, setSiteTplNameDraft] = useState({});
+
+  const [funnelTplGalleryOpen, setFunnelTplGalleryOpen] = useState(false);
+  const [funnelTplList, setFunnelTplList] = useState([]);
+  const [funnelTplCategories, setFunnelTplCategories] = useState([]);
+  const [funnelTplCategoryFilter, setFunnelTplCategoryFilter] = useState('');
+  const [funnelTplSearch, setFunnelTplSearch] = useState('');
+  const [funnelTplLoading, setFunnelTplLoading] = useState(false);
+  const [funnelTplUsingId, setFunnelTplUsingId] = useState(null);
+
+  const [formTplGalleryOpen, setFormTplGalleryOpen] = useState(false);
+  const [formTplList, setFormTplList] = useState([]);
+  const [formTplCategories, setFormTplCategories] = useState([]);
+  const [formTplCategoryFilter, setFormTplCategoryFilter] = useState('');
+  const [formTplSearch, setFormTplSearch] = useState('');
+  const [formTplLoading, setFormTplLoading] = useState(false);
+  const [formTplUsingId, setFormTplUsingId] = useState(null);
 
   const [blockFormOptions, setBlockFormOptions] = useState([]);
   const [blockFormOptionsLoading, setBlockFormOptionsLoading] = useState(false);
@@ -4106,7 +4123,7 @@ export default function AppShell() {
     try {
       const data = await apiFetch('/api/v1/ai-documents/generate', { method:'POST', body: JSON.stringify({ type, prompt }) });
       setAiDocDraft((d) => ({ ...d, content: data.generated, promptUsed: prompt }));
-      if (!data.usedAI) showToast('Template used — add ANTHROPIC_API_KEY to backend .env for real AI generation.', 'warning');
+      if (!data.usedAI) showToast('Template used — add GEMINI_API_KEY to the backend environment for real AI generation.', 'warning');
     } catch { showToast('Generation failed.'); }
     setAiDocGenerating(false);
   }
@@ -4920,11 +4937,16 @@ export default function AppShell() {
     } finally { setSiteTplLoading(false); }
   }
 
-  async function reloadSiteTemplateList(category) {
+  async function reloadSiteTemplateList(overrides = {}) {
     setSiteTplLoading(true);
     try {
-      const params = category ? `?category=${encodeURIComponent(category)}` : '';
-      const data = await apiFetch(`/api/v1/site-templates${params}`);
+      const params = new URLSearchParams();
+      const category = overrides.category !== undefined ? overrides.category : siteTplCategoryFilter;
+      const q = overrides.q !== undefined ? overrides.q : siteTplSearch;
+      if (category) params.set('category', category);
+      if (q.trim()) params.set('q', q.trim());
+      const qs = params.toString();
+      const data = await apiFetch(`/api/v1/site-templates${qs ? `?${qs}` : ''}`);
       setSiteTplList(data.templates || []);
     } finally { setSiteTplLoading(false); }
   }
@@ -4946,6 +4968,100 @@ export default function AppShell() {
     } catch (err) {
       showToast(err.message || 'Unable to use that site template.');
     } finally { setSiteTplUsingId(null); }
+  }
+
+  async function openFunnelTemplateGallery() {
+    setFunnelTplGalleryOpen(true);
+    setFunnelTplLoading(true);
+    try {
+      const [catRes, listRes] = await Promise.all([
+        apiFetch('/api/v1/funnel-templates/categories'),
+        apiFetch('/api/v1/funnel-templates'),
+      ]);
+      setFunnelTplCategories(catRes.categories || []);
+      setFunnelTplList(listRes.templates || []);
+    } finally { setFunnelTplLoading(false); }
+  }
+
+  async function reloadFunnelTemplateList(overrides = {}) {
+    setFunnelTplLoading(true);
+    try {
+      const params = new URLSearchParams();
+      const category = overrides.category !== undefined ? overrides.category : funnelTplCategoryFilter;
+      const q = overrides.q !== undefined ? overrides.q : funnelTplSearch;
+      if (category) params.set('category', category);
+      if (q.trim()) params.set('q', q.trim());
+      const qs = params.toString();
+      const data = await apiFetch(`/api/v1/funnel-templates${qs ? `?${qs}` : ''}`);
+      setFunnelTplList(data.templates || []);
+    } finally { setFunnelTplLoading(false); }
+  }
+
+  async function useFunnelTemplate(templateId) {
+    setFunnelTplUsingId(templateId);
+    try {
+      const data = await apiFetch(`/api/v1/funnel-templates/${templateId}/use`, { method: 'POST', body: JSON.stringify({}) });
+      setFunnelTplGalleryOpen(false);
+      const [funnelRes, pageRes] = await Promise.all([
+        apiFetch('/api/v1/funnels'),
+        apiFetch('/api/v1/pages?type=landing'),
+      ]);
+      setFunnels(funnelRes.funnels || []);
+      setLpPages(pageRes.pages || []);
+      showToast(`Funnel created — ${data.steps.length} steps ready to customize.`);
+      await openFunnelEditor(data.funnel.id);
+    } catch (err) {
+      showToast(err.message || 'Unable to use that funnel template.');
+    } finally { setFunnelTplUsingId(null); }
+  }
+
+  async function openFormTemplateGallery() {
+    setFormTplGalleryOpen(true);
+    setFormTplLoading(true);
+    try {
+      const [catRes, listRes] = await Promise.all([
+        apiFetch('/api/v1/form-templates/categories'),
+        apiFetch('/api/v1/form-templates'),
+      ]);
+      setFormTplCategories(catRes.categories || []);
+      setFormTplList(listRes.templates || []);
+    } finally { setFormTplLoading(false); }
+  }
+
+  async function reloadFormTemplateList(overrides = {}) {
+    setFormTplLoading(true);
+    try {
+      const params = new URLSearchParams();
+      const category = overrides.category !== undefined ? overrides.category : formTplCategoryFilter;
+      const q = overrides.q !== undefined ? overrides.q : formTplSearch;
+      if (category) params.set('category', category);
+      if (q.trim()) params.set('q', q.trim());
+      const qs = params.toString();
+      const data = await apiFetch(`/api/v1/form-templates${qs ? `?${qs}` : ''}`);
+      setFormTplList(data.templates || []);
+    } finally { setFormTplLoading(false); }
+  }
+
+  async function useFormTemplate(templateId) {
+    setFormTplUsingId(templateId);
+    try {
+      const data = await apiFetch(`/api/v1/form-templates/${templateId}`);
+      const template = data.template;
+      setEditingFbForm(null);
+      setFbDraft({
+        name: template.name,
+        description: template.description || '',
+        fields: Array.isArray(template.fields) ? template.fields : [],
+        status: 'active',
+        submitMessage: template.submit_message || 'Thank you for your submission!',
+      });
+      setFbNewField({ label: '', type: 'text', required: false, options: '', showIfFieldId: '', showIfValue: '' });
+      setFbForm(true);
+      setFormTplGalleryOpen(false);
+      showToast('Template loaded — customize the form before you save it.');
+    } catch (err) {
+      showToast(err.message || 'Unable to load that form template.');
+    } finally { setFormTplUsingId(null); }
   }
 
   async function handleCreatePage(e) {
@@ -5069,6 +5185,19 @@ export default function AppShell() {
     setFunnelDraft({ name: data.funnel.name, description: data.funnel.description || '', status: data.funnel.status });
     setAddingStepPageId('');
     setAddingStepType('page');
+  }
+
+  async function openFunnelStepPage(step) {
+    const data = await apiFetch(`/api/v1/pages/${step.page_id}`);
+    if (data.error) { showToast(data.error); return; }
+    if (data.page.page_type === 'landing') {
+      setActiveModuleSlug('landing-page-builder');
+      openLpPageEditor(data.page);
+      return;
+    }
+    setActiveModuleSlug('website-builder');
+    setPageEditorSource('website-builder');
+    openPageEditor(data.page);
   }
 
   async function handleSaveFunnel() {
@@ -6371,14 +6500,23 @@ export default function AppShell() {
     return (
       <Modal isOpen wide title="Choose a multi-page site template" description="Creates a full set of linked pages (home, about, services, contact, and more) in one go — every page and block stays fully editable after." onClose={() => setSiteTplGalleryOpen(false)}>
         <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 220px' }}>
+            <SearchInput
+              value={siteTplSearch}
+              onChange={(e) => setSiteTplSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') reloadSiteTemplateList(); }}
+              placeholder="Search site templates…"
+            />
+          </div>
           <select
             className="toolbar-select"
             value={siteTplCategoryFilter}
-            onChange={(e) => { setSiteTplCategoryFilter(e.target.value); reloadSiteTemplateList(e.target.value); }}
+            onChange={(e) => { setSiteTplCategoryFilter(e.target.value); reloadSiteTemplateList({ category: e.target.value }); }}
           >
             <option value="">All categories ({siteTplCategories.reduce((s, c) => s + Number(c.count), 0)})</option>
             {siteTplCategories.map((c) => <option key={c.category} value={c.category}>{c.category} ({c.count})</option>)}
           </select>
+          <Button variant="secondary" size="sm" onClick={() => reloadSiteTemplateList()}>Search</Button>
         </div>
         {siteTplLoading ? (
           <SkeletonRows rows={4} />
@@ -6387,19 +6525,116 @@ export default function AppShell() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14, maxHeight: '55vh', overflowY: 'auto', padding: 2 }}>
             {siteTplList.map((t) => (
-              <div key={t.id} className="card-shell" style={{ padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <Badge variant="neutral">{t.category}</Badge>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t.name}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t.description}</div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>{t.page_count} linked pages included</div>
-                <input
-                  className="field-input"
-                  placeholder="Your site/business name"
-                  value={siteTplNameDraft[t.id] || ''}
-                  onChange={(e) => setSiteTplNameDraft((d) => ({ ...d, [t.id]: e.target.value }))}
-                  style={{ fontSize: 13 }}
-                />
-                <Button size="sm" loading={siteTplUsingId === t.id} onClick={() => useSiteTemplate(t.id)}>Create this site</Button>
+              <div key={t.id} className="card-shell" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 120, background: t.thumbnail_url ? `url(${t.thumbnail_url}) center/cover` : 'var(--surface-muted)' }} />
+                <div style={{ padding: '16px 16px 14px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                  <Badge variant="neutral">{t.category}</Badge>
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t.name}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t.description}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>{t.page_count} linked pages included</div>
+                  <input
+                    className="field-input"
+                    placeholder="Your site/business name"
+                    value={siteTplNameDraft[t.id] || ''}
+                    onChange={(e) => setSiteTplNameDraft((d) => ({ ...d, [t.id]: e.target.value }))}
+                    style={{ fontSize: 13 }}
+                  />
+                  <Button size="sm" loading={siteTplUsingId === t.id} onClick={() => useSiteTemplate(t.id)}>Create this site</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+    );
+  }
+
+  function renderFunnelTemplateGallery() {
+    if (!funnelTplGalleryOpen) return null;
+    return (
+      <Modal isOpen wide title="Choose a funnel template" description="Creates a real multi-step funnel with editable landing pages you can open and refine after it is created." onClose={() => setFunnelTplGalleryOpen(false)}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 220px' }}>
+            <SearchInput
+              value={funnelTplSearch}
+              onChange={(e) => setFunnelTplSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') reloadFunnelTemplateList(); }}
+              placeholder="Search funnel templates…"
+            />
+          </div>
+          <select
+            className="toolbar-select"
+            value={funnelTplCategoryFilter}
+            onChange={(e) => { setFunnelTplCategoryFilter(e.target.value); reloadFunnelTemplateList({ category: e.target.value }); }}
+          >
+            <option value="">All categories ({funnelTplCategories.reduce((s, c) => s + Number(c.count), 0)})</option>
+            {funnelTplCategories.map((c) => <option key={c.category} value={c.category}>{c.category} ({c.count})</option>)}
+          </select>
+          <Button variant="secondary" size="sm" onClick={() => reloadFunnelTemplateList()}>Search</Button>
+        </div>
+        {funnelTplLoading ? (
+          <SkeletonRows rows={4} />
+        ) : funnelTplList.length === 0 ? (
+          <EmptyState icon="🧭" title="No funnel templates match" description="Try a different search term or category." />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14, maxHeight: '55vh', overflowY: 'auto', padding: 2 }}>
+            {funnelTplList.map((t) => (
+              <div key={t.id} className="card-shell" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 110, background: t.thumbnail_url ? `url(${t.thumbnail_url}) center/cover` : 'var(--surface-muted)' }} />
+                <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+                  <Badge variant="neutral">{t.category}</Badge>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.name}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', flex: 1 }}>{t.description}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>{t.step_count} connected steps</div>
+                  <Button size="sm" loading={funnelTplUsingId === t.id} onClick={() => useFunnelTemplate(t.id)}>Use this template</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+    );
+  }
+
+  function renderFormTemplateGallery() {
+    if (!formTplGalleryOpen) return null;
+    return (
+      <Modal isOpen wide title="Choose a form template" description="Loads a real form structure into the editor so you can customize the fields before you save and publish it." onClose={() => setFormTplGalleryOpen(false)}>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 220px' }}>
+            <SearchInput
+              value={formTplSearch}
+              onChange={(e) => setFormTplSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') reloadFormTemplateList(); }}
+              placeholder="Search form templates…"
+            />
+          </div>
+          <select
+            className="toolbar-select"
+            value={formTplCategoryFilter}
+            onChange={(e) => { setFormTplCategoryFilter(e.target.value); reloadFormTemplateList({ category: e.target.value }); }}
+          >
+            <option value="">All categories ({formTplCategories.reduce((s, c) => s + Number(c.count), 0)})</option>
+            {formTplCategories.map((c) => <option key={c.category} value={c.category}>{c.category} ({c.count})</option>)}
+          </select>
+          <Button variant="secondary" size="sm" onClick={() => reloadFormTemplateList()}>Search</Button>
+        </div>
+        {formTplLoading ? (
+          <SkeletonRows rows={4} />
+        ) : formTplList.length === 0 ? (
+          <EmptyState icon="📝" title="No form templates match" description="Try a different search term or category." />
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14, maxHeight: '55vh', overflowY: 'auto', padding: 2 }}>
+            {formTplList.map((t) => (
+              <div key={t.id} className="card-shell" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: 110, background: t.thumbnail_url ? `url(${t.thumbnail_url}) center/cover` : 'var(--surface-muted)' }} />
+                <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+                  <Badge variant="neutral">{t.category}</Badge>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{t.name}</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', flex: 1 }}>{t.description}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>{t.field_count} starting fields</div>
+                  <Button size="sm" loading={formTplUsingId === t.id} onClick={() => useFormTemplate(t.id)}>Use this template</Button>
+                </div>
               </div>
             ))}
           </div>
@@ -8782,11 +9017,11 @@ export default function AppShell() {
                   {/* Pages list */}
                   <button className="back-link" onClick={goHome}>← Workspace</button>
                   <div className="module-head">
-                    <div><h1>Website Builder</h1><p className="module-sub">Build and publish landing pages — no code required.</p></div>
+                    <div><h1>Website Builder</h1><p className="module-sub">Build standalone pages or full multi-page sites — no code required.</p></div>
                     <div style={{ display: 'flex', gap: 8 }}>
+                      <Button variant="secondary" onClick={() => openTemplateGallery('page')}>Start from a template</Button>
                       <Button variant="secondary" onClick={openSiteTemplateGallery}>Multi-page site template</Button>
-                      <Button variant="secondary" onClick={() => openTemplateGallery('page')}>Choose a template</Button>
-                      <button className="primary-btn" onClick={() => setShowPageForm((v) => !v)}>+ New page</button>
+                      <button className="primary-btn" onClick={() => setShowPageForm((v) => !v)}>Start from scratch</button>
                     </div>
                   </div>
 
@@ -8804,7 +9039,21 @@ export default function AppShell() {
                   {!pagesLoaded ? (
                     <div className="empty-note">Loading pages…</div>
                   ) : pages.length === 0 ? (
-                    <div className="empty-note">No pages yet. Create your first one above.</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                      <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ fontWeight: 700 }}>Start from scratch</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Create a blank page and build each section yourself with the same block editor used across the site builder.</div>
+                        <Button onClick={() => setShowPageForm(true)}>Create a blank page</Button>
+                      </div>
+                      <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ fontWeight: 700 }}>Start from a template</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Choose a single-page starter or spin up a full multi-page site with real content, imagery, and linked navigation.</div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <Button variant="secondary" onClick={() => openTemplateGallery('page')}>Single-page templates</Button>
+                          <Button variant="secondary" onClick={openSiteTemplateGallery}>Multi-page site templates</Button>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
                       {pages.map((page) => (
@@ -8899,6 +9148,7 @@ export default function AppShell() {
                           <button className="ctag" style={{ fontSize: 11, padding: '2px 6px', opacity: idx === 0 ? 0.3 : 1 }} disabled={idx === 0} onClick={() => moveFunnelStep(idx, -1)}>▲</button>
                           <button className="ctag" style={{ fontSize: 11, padding: '2px 6px', opacity: idx === funnelSteps.length - 1 ? 0.3 : 1 }} disabled={idx === funnelSteps.length - 1} onClick={() => moveFunnelStep(idx, 1)}>▼</button>
                         </div>
+                        <button className="ctag" onClick={() => openFunnelStepPage(step)}>Edit page</button>
                         {step.page_status === 'published' && (
                           <a href={`/p/${step.page_slug}`} target="_blank" rel="noopener" className="ctag">View ↗</a>
                         )}
@@ -8945,7 +9195,10 @@ export default function AppShell() {
                   <button className="back-link" onClick={goHome}>← Workspace</button>
                   <div className="module-head">
                     <div><h1>Funnel Builder</h1><p className="module-sub">Chain pages into multi-step sales funnels.</p></div>
-                    <button className="primary-btn" onClick={() => setShowFunnelForm((v) => !v)}>+ New funnel</button>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Button variant="secondary" onClick={openFunnelTemplateGallery}>Start from a template</Button>
+                      <button className="primary-btn" onClick={() => setShowFunnelForm((v) => !v)}>Start from scratch</button>
+                    </div>
                   </div>
 
                   {showFunnelForm && (
@@ -8962,7 +9215,18 @@ export default function AppShell() {
                   {!funnelsLoaded ? (
                     <div className="empty-note">Loading funnels…</div>
                   ) : funnels.length === 0 ? (
-                    <div className="empty-note">No funnels yet. Create your first one above.</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                      <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ fontWeight: 700 }}>Start from scratch</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Create a blank funnel, then add your own pages and define the order step by step.</div>
+                        <Button onClick={() => setShowFunnelForm(true)}>Create a blank funnel</Button>
+                      </div>
+                      <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ fontWeight: 700 }}>Start from a template</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Browse category-specific funnels with real step pages, imagery, and connected calls to action.</div>
+                        <Button variant="secondary" onClick={openFunnelTemplateGallery}>Browse funnel templates</Button>
+                      </div>
+                    </div>
                   ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
                       {funnels.map((funnel) => (
@@ -8995,6 +9259,7 @@ export default function AppShell() {
                 danger
                 loading={funnelDeleting}
               />
+              {renderFunnelTemplateGallery()}
             </div>
           )}
 
@@ -10976,8 +11241,8 @@ export default function AppShell() {
                   <p className="module-sub">Build focused landing pages for campaigns, products, and lead capture.</p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Button variant="secondary" onClick={() => openTemplateGallery('landing')}>Choose a template</Button>
-                  <button className="primary-btn" onClick={() => setShowPageForm((v) => !v)}>+ New page</button>
+                  <Button variant="secondary" onClick={() => openTemplateGallery('landing')}>Start from a template</Button>
+                  <button className="primary-btn" onClick={() => setShowPageForm((v) => !v)}>Start from scratch</button>
                 </div>
               </div>
 
@@ -10995,11 +11260,17 @@ export default function AppShell() {
               {!lpLoaded ? (
                 <div className="empty-note">Loading pages…</div>
               ) : lpPages.length === 0 ? (
-                <div className="empty-note" style={{ textAlign: 'center', padding: '48px 24px' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🚀</div>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 6 }}>No landing pages yet</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 16 }}>Create your first page to start collecting leads and driving conversions.</div>
-                  <button className="primary-btn" onClick={() => setShowPageForm(true)}>+ Create your first page</button>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                  <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontWeight: 700 }}>Start from scratch</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Create a blank landing page and build the offer, proof, and conversion path yourself.</div>
+                    <Button onClick={() => setShowPageForm(true)}>Create a blank landing page</Button>
+                  </div>
+                  <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontWeight: 700 }}>Start from a template</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Browse industry-specific landing pages with real imagery and editable conversion sections.</div>
+                    <Button variant="secondary" onClick={() => openTemplateGallery('landing')}>Browse landing templates</Button>
+                  </div>
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
@@ -12357,7 +12628,12 @@ export default function AppShell() {
             back={{ label: 'Workspace', onClick: goHome }}
             title="Forms & Surveys"
             description="Custom forms with conditional logic — collect structured responses from anyone, no login required. Part of Marketing."
-            primaryAction={!fbForm && <Button onClick={() => { setEditingFbForm(null); setFbDraft({ name:'', description:'', fields:[], status:'active', submitMessage:'Thank you for your submission!' }); setFbForm(true); }}>+ New Form</Button>}
+            primaryAction={!fbForm && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Button onClick={() => { setEditingFbForm(null); setFbDraft({ name:'', description:'', fields:[], status:'active', submitMessage:'Thank you for your submission!' }); setFbForm(true); }}>Start from scratch</Button>
+                <Button variant="secondary" onClick={openFormTemplateGallery}>Start from a template</Button>
+              </div>
+            )}
             stats={fbStats ? [
               { label: 'Active Forms', value: fbStats.activeForms },
               { label: 'Total Responses', value: fbStats.totalResponses },
@@ -12430,12 +12706,18 @@ export default function AppShell() {
               !fbLoaded ? (
                 <SkeletonRows rows={3} />
               ) : fbForms.length === 0 ? (
-                <EmptyState
-                  icon="📝"
-                  title="No forms yet"
-                  description="Build a form with real branching logic — fields can show or hide based on earlier answers."
-                  action={<Button onClick={() => { setEditingFbForm(null); setFbDraft({ name:'', description:'', fields:[], status:'active', submitMessage:'Thank you for your submission!' }); setFbForm(true); }}>+ New Form</Button>}
-                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                  <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontWeight: 700 }}>Start from scratch</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Build a custom form with branching logic, your own fields, and your own submission message.</div>
+                    <Button onClick={() => { setEditingFbForm(null); setFbDraft({ name:'', description:'', fields:[], status:'active', submitMessage:'Thank you for your submission!' }); setFbForm(true); }}>Create a blank form</Button>
+                  </div>
+                  <div className="card-shell" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontWeight: 700 }}>Start from a template</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Browse category-specific inquiry and intake forms, then customize the fields before you save them.</div>
+                    <Button variant="secondary" onClick={openFormTemplateGallery}>Browse form templates</Button>
+                  </div>
+                </div>
               ) : filteredForms.length === 0 ? (
                 <EmptyState icon="🔍" title="No matching forms" description="Try a different search term." action={<Button variant="secondary" onClick={() => setFbQuery('')}>Clear search</Button>} />
               ) : (
@@ -12476,6 +12758,7 @@ export default function AppShell() {
               danger
               loading={fbFormDeleting}
             />
+            {renderFormTemplateGallery()}
           </ModulePage>
         );
       })()}
@@ -15865,7 +16148,7 @@ export default function AppShell() {
                   <input className="form-input" style={{ flex:1 }} placeholder={promptMap[docType]} value={aiDocPrompt} onChange={(e) => setAiDocPrompt(e.target.value)} onKeyDown={(e) => e.key==='Enter' && handleAiGenerate(docType, aiDocPrompt)} />
                   <button className="btn-primary" onClick={() => handleAiGenerate(docType, aiDocPrompt)} disabled={aiDocGenerating} style={{ minWidth:90 }}>{aiDocGenerating ? 'Generating…' : '✨ Generate'}</button>
                 </div>
-                <div style={{ fontSize:'0.7rem', color:'var(--muted)', marginTop:'0.3rem' }}>Powered by Claude AI — add ANTHROPIC_API_KEY to .env to enable</div>
+                <div style={{ fontSize:'0.7rem', color:'var(--muted)', marginTop:'0.3rem' }}>Powered by Gemini — add GEMINI_API_KEY to the backend environment to enable</div>
               </div>
               <textarea className="form-input" style={{ width:'100%', minHeight:350, fontFamily:'monospace', fontSize:'0.85rem', resize:'vertical' }} placeholder="Write or generate your content here…" value={aiDocDraft.content} onChange={(e) => setAiDocDraft((d)=>({...d,content:e.target.value}))} />
               <div style={{ display:'flex', gap:'0.5rem', marginTop:'0.75rem' }}>

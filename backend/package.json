@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "migrate": "node db/migrate.js",
-    "seed": "node db/seed.js"
+    "seed": "node db/seed.js && node db/seedPageTemplates.js && node db/seedSiteTemplates.js && node db/seedEmailTemplates.js && node db/seedFunnelTemplates.js && node db/seedFormTemplates.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
